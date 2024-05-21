@@ -7,37 +7,56 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserReqDto } from './dto/req/create-user.req.dto';
+import { UpdateUserReqDto } from './dto/req/update-user.req.dto';
+import { PrivateUserResDto } from './dto/res/private-user.res.dto';
+import { PublicUserResDto } from './dto/res/public-user.res.dto';
 import { UserService } from './user.service';
 
+@ApiTags('users')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiConflictResponse({ description: 'Conflict' })
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  public async create(
+    @Body() createUserDto: CreateUserReqDto,
+  ): Promise<PrivateUserResDto> {
+    return await this.userService.create(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  public async findOne(@Param('id') id: string): Promise<PublicUserResDto> {
+    return await this.userService.findOne(id);
   }
 
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  public async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserReqDto,
+  ): Promise<PrivateUserResDto> {
+    return await this.userService.update(id, updateUserDto);
   }
 
+  @ApiNoContentResponse()
+  @ApiNotFoundResponse({ description: 'Not found' })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+  public async remove(@Param('id') id: string): Promise<any> {
+    return await this.userService.remove(id);
   }
 }
