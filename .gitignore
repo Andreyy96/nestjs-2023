@@ -3,6 +3,10 @@
 /node_modules
 /build
 
+sept-2023-api-db
+sept-2023-api-s3-data
+environments/local.env
+
 # Logs
 logs
 *.log

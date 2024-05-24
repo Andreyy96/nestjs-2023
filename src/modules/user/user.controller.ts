@@ -43,6 +43,11 @@ export class UserController {
     return await this.userService.findOne(id);
   }
 
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiNotFoundResponse({ description: 'Not found' })
   @Patch(':id')
