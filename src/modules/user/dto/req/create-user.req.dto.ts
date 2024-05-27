@@ -48,13 +48,6 @@ export class CreateUserReqDto {
   @Transform(TransformHelper.trim)
   public readonly password: string;
 
-  @IsString()
-  @Matches(
-    /\(?\+[0-9]{1,3}\)? ?-?[0-9]{1,3} ?-?[0-9]{3,5} ?-?[0-9]{4}( ?-?[0-9]{3})? ?(\w{1,10}\s?\d{1,6})?/,
-  )
-  @Transform(TransformHelper.trim)
-  public readonly phone?: string;
-
   @IsOptional()
   @IsString()
   @ValidateIf((object) => object.age > 25)

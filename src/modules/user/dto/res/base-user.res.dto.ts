@@ -21,12 +21,6 @@ export class BaseUserResDto {
   public readonly email: string;
 
   @ApiProperty({
-    example: '+38097777777',
-    description: 'The phone of the User',
-  })
-  public readonly phone?: string;
-
-  @ApiProperty({
     example: 20,
     description: 'The age of the User',
   })
