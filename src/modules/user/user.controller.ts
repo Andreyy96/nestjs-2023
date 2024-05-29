@@ -8,12 +8,10 @@ import {
   Post,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
-  ApiConflictResponse,
   ApiForbiddenResponse,
-  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 import { CreateUserReqDto } from './dto/req/create-user.req.dto';
@@ -22,44 +20,48 @@ import { PrivateUserResDto } from './dto/res/private-user.res.dto';
 import { PublicUserResDto } from './dto/res/public-user.res.dto';
 import { UserService } from './user.service';
 
-@ApiTags('users')
-@Controller('user')
+@ApiTags('Users')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiBadRequestResponse({ description: 'Bad request' })
-  @ApiConflictResponse({ description: 'Conflict' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
   @Post()
   public async create(
-    @Body() createUserDto: CreateUserReqDto,
+    @Body() dto: CreateUserReqDto,
   ): Promise<PrivateUserResDto> {
-    return await this.userService.create(createUserDto);
+    return await this.userService.create(dto);
+  }
+
+  @Get()
+  public async findAll(): Promise<any> {
+    return await this.userService.findAll();
   }
 
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiNotFoundResponse({ description: 'Not found' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
   @Get(':id')
   public async findOne(@Param('id') id: string): Promise<PublicUserResDto> {
     return await this.userService.findOne(id);
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @ApiBadRequestResponse({ description: 'Bad request' })
-  @ApiNotFoundResponse({ description: 'Not found' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
   @Patch(':id')
   public async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserReqDto,
-  ): Promise<PrivateUserResDto> {
+  ): Promise<any> {
     return await this.userService.update(id, updateUserDto);
   }
 
-  @ApiNoContentResponse()
-  @ApiNotFoundResponse({ description: 'Not found' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
   @Delete(':id')
   public async remove(@Param('id') id: string): Promise<any> {
     return await this.userService.remove(id);

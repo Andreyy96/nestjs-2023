@@ -1,3 +1,5 @@
+import * as process from 'process';
+
 import { Config } from './configs.type';
 
 export default (): Config => ({
@@ -16,5 +18,10 @@ export default (): Config => ({
     port: parseInt(process.env.REDIS_PORT) || 6379,
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
+  },
+  sentry: {
+    dbs: process.env.SENTRY_DSN,
+    debug: process.env.SENTRY_DEBUG === 'true',
+    env: process.env.SENTRY_ENVIRONMENT,
   },
 });
