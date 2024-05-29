@@ -1,31 +1,13 @@
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
-  IsInt,
-  IsNumber,
-  IsObject,
   IsOptional,
   IsString,
   Length,
   Matches,
-  Max,
   MaxLength,
-  Min,
-  ValidateIf,
-  ValidateNested,
 } from 'class-validator';
 
 import { TransformHelper } from '../../../../common/helpers/transform.helper';
-
-class CarReqDto {
-  @IsString()
-  @Transform(TransformHelper.trim)
-  @MaxLength(255)
-  producer: string;
-
-  @IsString()
-  @Transform(TransformHelper.trim)
-  model: string;
-}
 
 export class CreateUserReqDto {
   @IsString()
@@ -50,22 +32,11 @@ export class CreateUserReqDto {
 
   @IsOptional()
   @IsString()
-  @ValidateIf((object) => object.age > 25)
   @MaxLength(255)
   @Transform(TransformHelper.trim)
-  public readonly avatar?: string;
-
-  @IsInt()
-  @IsNumber()
-  @Min(18)
-  @Max(150)
-  @IsOptional()
-  @Type(() => Number)
-  public readonly age?: number;
+  public readonly image?: string;
 
   @IsOptional()
-  @IsObject()
-  @Type(() => CarReqDto)
-  @ValidateNested({ each: true })
-  car: CarReqDto;
+  @Transform(TransformHelper.trim)
+  public readonly bio?: string;
 }
