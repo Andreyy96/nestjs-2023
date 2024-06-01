@@ -25,11 +25,11 @@ export class UserEntity extends BaseModel {
   @Column('text', { nullable: true })
   image?: string;
 
-  @OneToMany(() => FollowEntity, (entity) => entity.user)
+  @OneToMany(() => FollowEntity, (entity) => entity.follower)
   followers?: FollowEntity[];
 
-  @OneToMany(() => FollowEntity, (entity) => entity.user)
-  following?: FollowEntity[];
+  @OneToMany(() => FollowEntity, (entity) => entity.following)
+  followings?: FollowEntity[];
 
   @OneToMany(() => RefreshTokenEntity, (entity) => entity.user)
   refreshTokens?: RefreshTokenEntity[];

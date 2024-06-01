@@ -10,9 +10,11 @@ export class FollowEntity extends BaseModel {
   follower_id: string;
   @ManyToOne(() => UserEntity, (entity) => entity.followers)
   @JoinColumn({ name: 'follower_id' })
+  follower?: UserEntity;
+
   @Column()
   following_id: string;
-  @ManyToOne(() => UserEntity, (entity) => entity.following)
+  @ManyToOne(() => UserEntity, (entity) => entity.followings)
   @JoinColumn({ name: 'following_id' })
-  user?: UserEntity;
+  following?: UserEntity;
 }
