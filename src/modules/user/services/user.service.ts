@@ -1,34 +1,102 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { IUserData } from '../../auth/interfaces/user-data.interface';
 import { LoggerService } from '../../logger/logger.service';
+import { FollowRepository } from '../../repository/services/follow.repository';
 import { UserRepository } from '../../repository/services/user.repository';
 import { UpdateUserReqDto } from '../dto/req/update-user.req.dto';
+import { UserResDto } from '../dto/res/user.res.dto';
+import { UserMapper } from './user.mapper';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly logger: LoggerService,
     private readonly userRepository: UserRepository,
+    private readonly followRepository: FollowRepository,
   ) {}
 
-  public async findAll(): Promise<any> {
-    return await this.userRepository.find();
+  public async getMe(userData: IUserData): Promise<UserResDto> {
+    const user = await this.userRepository.findOneBy({ id: userData.userId });
+    return UserMapper.toResponseDTO(user);
   }
 
-  public async findOne(id: string): Promise<any> {
-    return `This action returns a #${id} user`;
+  public async getById(id: string): Promise<UserResDto> {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return UserMapper.toResponseDTO(user);
   }
 
-  public async update(
+  public async updateMe(
     userData: IUserData,
     updateUserDto: UpdateUserReqDto,
-  ): Promise<any> {
-    return `This action updates a #${userData.userId} user ${updateUserDto}`;
+  ): Promise<UserResDto> {
+    const user = await this.userRepository.findOneBy({ id: userData.userId });
+
+    const updateUser = await this.userRepository.save({
+      ...user,
+      ...updateUserDto,
+    });
+
+    return UserMapper.toResponseDTO(updateUser);
   }
 
-  public async remove(id: string): Promise<any> {
-    return `This action removes a #${id} user`;
+  public async removeMe(userData: IUserData): Promise<void> {
+    await this.userRepository.delete({ id: userData.userId });
+  }
+
+  public async follow(userData: IUserData, userId: string): Promise<void> {
+    if (userId === userData.userId) {
+      throw new ConflictException('You cannot follow yourself');
+    }
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const follow = await this.followRepository.findOneBy({
+      follower_id: userData.userId,
+      following_id: userId,
+    });
+
+    if (follow) {
+      throw new ConflictException('You already following this user');
+    }
+
+    await this.followRepository.save(
+      this.followRepository.create({
+        follower_id: userData.userId,
+        following_id: userId,
+      }),
+    );
+  }
+  public async unfollow(userData: IUserData, userId: string): Promise<void> {
+    if (userId === userData.userId) {
+      throw new ConflictException('You cannot unfollow yourself');
+    }
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const follow = await this.followRepository.findOneBy({
+      follower_id: userData.userId,
+      following_id: userId,
+    });
+
+    if (!follow) {
+      throw new ConflictException('You cannot unfollow this user');
+    }
+
+    await this.followRepository.remove(follow);
   }
 
   public async isEmailUniqueOrThrow(email: string): Promise<void> {
