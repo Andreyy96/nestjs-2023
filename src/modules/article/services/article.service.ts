@@ -54,19 +54,30 @@ export class ArticleService {
     return ArticleMapper.toResponseDTO(article);
   }
 
+  private async createTags(tags: string[]): Promise<TagEntity[]> {
+    if (!tags || tags.length === 0) return [];
+
+    const entities = await this.tagRepository.findBy({ name: In(tags) });
+    const existingTags = new Set(entities.map((tag) => tag.name));
+    const newTags = tags.filter((tag) => !existingTags.has(tag));
+
+    const newEntities = await this.tagRepository.save(
+      newTags.map((name) => this.tagRepository.create({ name })),
+    );
+    return [...entities, ...newEntities];
+  }
+
   public async getById(
     userData: IUserData,
     articleId: string,
   ): Promise<ArticleResDto> {
-    const article = await this.findMyArticleByIdOrThrow(
-      userData.userId,
+    const article = await this.articleRepository.findArticleById(
+      userData,
       articleId,
     );
-
     if (!article) {
       throw new NotFoundException('Article not found');
     }
-
     return ArticleMapper.toResponseDTO(article);
   }
 
@@ -79,13 +90,11 @@ export class ArticleService {
       userData.userId,
       articleId,
     );
-
     await this.articleRepository.save({ ...article, ...dto });
     const updatedArticle = await this.articleRepository.findArticleById(
       userData,
       articleId,
     );
-
     return ArticleMapper.toResponseDTO(updatedArticle);
   }
 
@@ -100,32 +109,19 @@ export class ArticleService {
     await this.articleRepository.remove(article);
   }
 
-  private async createTags(tags: string[]): Promise<TagEntity[]> {
-    if (!tags || tags.length === 0) return [];
-
-    const entities = await this.tagRepository.findBy({ name: In(tags) });
-    const existingTags = new Set(entities.map((tag) => tag.name));
-    const newTags = tags.filter((tag) => !existingTags.has(tag));
-
-    const newEntities = await this.tagRepository.save(
-      newTags.map((name) => this.tagRepository.create({ name })),
-    );
-    return [...entities, ...newEntities];
-  }
-
-  private async findMyArticleByIdOrThrow(
+  public async findMyArticleByIdOrThrow(
     userId: string,
     articleId: string,
   ): Promise<ArticleEntity> {
-    const article = await this.articleRepository.findOneBy({ id: articleId });
-
+    const article = await this.articleRepository.findOneBy({
+      id: articleId,
+    });
     if (!article) {
       throw new NotFoundException('Article not found');
     }
     if (article.user_id !== userId) {
       throw new ForbiddenException();
     }
-
     return article;
   }
 }
