@@ -1,18 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
+import { Config, JWTConfig } from '../../../configs/configs.type';
 import { RedisService } from '../../redis/redis.service';
 
 @Injectable()
 export class AuthCacheService {
-  constructor(private readonly redisService: RedisService) {}
+  private jwtConfig: JWTConfig;
 
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly configService: ConfigService<Config>,
+  ) {
+    this.jwtConfig = this.configService.get('jwt');
+  }
   public async saveToken(
     token: string,
     userId: string,
     deviceId: string,
   ): Promise<void> {
-    const key = `ACCESS_TOKEN:${userId}:${deviceId}`;
+    const key = this.getKey(userId, deviceId);
+
+    await this.redisService.deleteByKey(key);
     await this.redisService.addOneToSet(key, token);
+    await this.redisService.expire(key, this.jwtConfig.accessExpiresIn);
   }
 
   public async isAccessTokenExist(
