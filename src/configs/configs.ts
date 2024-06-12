@@ -30,4 +30,11 @@ export default (): Config => ({
     refreshSecret: process.env.JWT_REFRESH_SECRET,
     refreshExpiresIn: parseInt(process.env.JWT_REFRESH_EXPIRES_IN),
   },
+  aws: {
+    accessKeyId: process.env.AWS_S3_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_S3_SECRET_KEY,
+    region: process.env.AWS_S3_REGION,
+    bucketName: process.env.AWS_S3_BUCKET_NAME,
+    endpoint: process.env.AWS_S3_ENDPOINT,
+  },
 });
