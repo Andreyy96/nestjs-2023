@@ -6,12 +6,14 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiTags,
@@ -88,5 +90,29 @@ export class ArticleController {
     @Param('articleId') articleId: string,
   ): Promise<void> {
     await this.articleService.deleteById(userData, articleId);
+  }
+
+  @ApiConflictResponse({ description: 'Conflict' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post(':articleId/like')
+  public async like(
+    @CurrentUser() userData: IUserData,
+    @Param('articleId', ParseUUIDPipe) articleId: string,
+  ): Promise<void> {
+    await this.articleService.like(userData, articleId);
+  }
+
+  @ApiConflictResponse({ description: 'Conflict' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':articleId/like')
+  public async unlike(
+    @CurrentUser() userData: IUserData,
+    @Param('articleId', ParseUUIDPipe) articleId: string,
+  ): Promise<void> {
+    await this.articleService.unlike(userData, articleId);
   }
 }

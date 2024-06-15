@@ -44,5 +44,6 @@ export type AWSConfig = {
   secretAccessKey: string;
   region: string;
   bucketName: string;
+  bucketUrl: string;
   endpoint: string;
 };
